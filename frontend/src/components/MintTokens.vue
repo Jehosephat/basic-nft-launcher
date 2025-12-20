@@ -27,7 +27,7 @@
               :key="tokenClass.id"
               :value="tokenClass.id"
             >
-              {{ tokenClass.collection }} - {{ tokenClass.type }} ({{ tokenClass.category }})
+              {{ tokenClass.collection }} - {{ tokenClass.category }} - {{ tokenClass.type }}{{ tokenClass.additionalKey ? ' - ' + tokenClass.additionalKey : '' }}
             </option>
           </select>
           <small v-if="!selectedTokenClassId" class="form-hint">
@@ -36,8 +36,10 @@
         </div>
         
         <div v-if="selectedTokenClass" class="token-class-info">
-          <h4>Selected Token Class</h4>
           <div class="token-class-content">
+            <div class="token-class-image" v-if="selectedTokenClass.image">
+              <img :src="selectedTokenClass.image" :alt="`${selectedTokenClass.collection} - ${selectedTokenClass.type}`" />
+            </div>
             <div class="token-class-details">
               <p><strong>Collection:</strong> {{ selectedTokenClass.collection }}</p>
               <p><strong>Type:</strong> {{ selectedTokenClass.type }}</p>
@@ -48,9 +50,6 @@
               <p v-if="selectedTokenClass.currentSupply">
                 <strong>Current Supply:</strong> {{ selectedTokenClass.currentSupply }}
               </p>
-            </div>
-            <div class="token-class-image" v-if="selectedTokenClass.image">
-              <img :src="selectedTokenClass.image" :alt="`${selectedTokenClass.collection} - ${selectedTokenClass.type}`" />
             </div>
           </div>
         </div>
@@ -353,30 +352,16 @@ onMounted(() => {
   margin-bottom: 1.5rem;
 }
 
-.token-class-info h4 {
-  color: #667eea;
-  margin-bottom: 0.5rem;
-}
-
 .token-class-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 1.5rem;
-  margin-top: 0.5rem;
-}
-
-.token-class-details {
-  flex: 1;
-}
-
-.token-class-details p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
+  align-items: start;
 }
 
 .token-class-image {
-  flex-shrink: 0;
   width: 200px;
-  height: 200px;
+  aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
   background: #f0f0f0;
@@ -389,6 +374,18 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.token-class-details {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.token-class-details p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
 .form-hint {
