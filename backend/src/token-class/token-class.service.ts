@@ -243,8 +243,6 @@ export class TokenClassService {
               }
               
               await this.tokenClassRepository.save(tokenClass);
-            } else {
-              console.warn(`No data found in response for token class ${tokenClass.id}`);
             }
 
             allTokenClasses.push(tokenClass);

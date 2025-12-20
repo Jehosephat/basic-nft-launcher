@@ -18,7 +18,7 @@ import { MintTransaction } from './entities/mint-transaction.entity';
       database: 'nft-collection.db',
       entities: [User, Transaction, Collection, TokenClass, MintTransaction],
       synchronize: true, // Only for development
-      logging: true,
+      logging: false,
     }),
     WalletModule,
     TransactionModule,

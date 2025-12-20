@@ -62,7 +62,6 @@ export class CollectionController {
       try {
         await this.collectionService.syncCollectionsFromChain(address);
       } catch (syncError) {
-        console.warn('Failed to sync collections from chain, using local data:', syncError);
       }
       
       // Return local collections (which may include synced ones)

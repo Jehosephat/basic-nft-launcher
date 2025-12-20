@@ -135,15 +135,6 @@ export class TokenClassController {
         address,
       );
 
-      // Log token classes to verify image field is present
-      console.log('Token classes returned:', JSON.stringify(tokenClasses.map(tc => ({ 
-        id: tc.id, 
-        collection: tc.collection, 
-        type: tc.type, 
-        image: tc.image,
-        currentSupply: tc.currentSupply 
-      })), null, 2));
-
       return {
         success: true,
         tokenClasses,
