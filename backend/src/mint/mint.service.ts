@@ -180,7 +180,7 @@ export class MintService {
           collection: mintData.collection,
           type: mintData.type,
           category: mintData.category,
-          additionalKey: mintData.additionalKey || '',
+          additionalKey: mintData.additionalKey || 'none',
           dtoExpiresAt: dtoExpiresAt,
         },
         tokenInstance: '0',

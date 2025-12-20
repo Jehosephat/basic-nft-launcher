@@ -31,7 +31,7 @@
           class="token-class-item"
         >
           <div class="token-class-header">
-            <h3>{{ tokenClass.collection }} - {{ tokenClass.category }} - {{ tokenClass.type }}{{ tokenClass.additionalKey ? ' - ' + tokenClass.additionalKey : '' }}</h3>
+            <h3>{{ tokenClass.collection }} - {{ tokenClass.category }} - {{ tokenClass.type }}{{ tokenClass.additionalKey && tokenClass.additionalKey !== 'none' ? ' - ' + tokenClass.additionalKey : '' }}</h3>
           </div>
           <div class="token-class-image" v-if="tokenClass.image">
             <img :src="tokenClass.image" :alt="`${tokenClass.collection} - ${tokenClass.type}`" />

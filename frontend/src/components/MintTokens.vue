@@ -27,7 +27,7 @@
               :key="tokenClass.id"
               :value="tokenClass.id"
             >
-              {{ tokenClass.collection }} - {{ tokenClass.category }} - {{ tokenClass.type }}{{ tokenClass.additionalKey ? ' - ' + tokenClass.additionalKey : '' }}
+              {{ tokenClass.collection }} - {{ tokenClass.category }} - {{ tokenClass.type }}{{ tokenClass.additionalKey && tokenClass.additionalKey !== 'none' ? ' - ' + tokenClass.additionalKey : '' }}
             </option>
           </select>
           <small v-if="!selectedTokenClassId" class="form-hint">
@@ -44,7 +44,7 @@
               <p><strong>Collection:</strong> {{ selectedTokenClass.collection }}</p>
               <p><strong>Type:</strong> {{ selectedTokenClass.type }}</p>
               <p><strong>Category:</strong> {{ selectedTokenClass.category }}</p>
-              <p v-if="selectedTokenClass.additionalKey">
+              <p v-if="selectedTokenClass.additionalKey && selectedTokenClass.additionalKey !== 'none'">
                 <strong>Additional Key:</strong> {{ selectedTokenClass.additionalKey }}
               </p>
               <p v-if="selectedTokenClass.currentSupply">

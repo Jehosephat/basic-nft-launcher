@@ -50,12 +50,13 @@ export class TokenClassService {
       }
 
       // Check if token class already exists
+      const additionalKeyValue = tokenClassData.additionalKey || 'none';
       const existing = await this.tokenClassRepository.findOne({
         where: {
           collection: tokenClassData.collection,
           type: tokenClassData.type,
           category: tokenClassData.category,
-          additionalKey: tokenClassData.additionalKey || null,
+          additionalKey: additionalKeyValue,
         },
       });
 
@@ -94,7 +95,7 @@ export class TokenClassService {
           collection: tokenClassData.collection,
           type: tokenClassData.type,
           category: tokenClassData.category,
-          additionalKey: tokenClassData.additionalKey,
+          additionalKey: tokenClassData.additionalKey || 'none',
           walletAddress,
           transactionId: result.transactionId || `tx-${Date.now()}`,
           status: 'completed',
@@ -127,7 +128,7 @@ export class TokenClassService {
           authorities: [walletAddress],
           category: tokenClassData.category,
           type: tokenClassData.type,
-          additionalKey: tokenClassData.additionalKey || '',
+          additionalKey: tokenClassData.additionalKey || 'none',
           name: tokenClassData.name || tokenClassData.collection,
           description: tokenClassData.description || '',
           image: tokenClassData.image || '',

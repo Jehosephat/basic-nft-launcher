@@ -66,7 +66,7 @@
             v-model="formData.additionalKey"
             type="text"
             class="form-control"
-            placeholder="Optional additional identifier"
+            placeholder="Optional (defaults to 'none')"
           />
         </div>
         
@@ -367,6 +367,7 @@ const estimateFees = async () => {
       body: JSON.stringify({
         walletAddress: props.walletAddress,
         ...formData.value,
+        additionalKey: formData.value.additionalKey || 'none',
       }),
     })
 
@@ -410,6 +411,7 @@ const createTokenClass = async () => {
       body: JSON.stringify({
         walletAddress: props.walletAddress,
         ...formData.value,
+        additionalKey: formData.value.additionalKey || 'none',
       }),
     })
 
