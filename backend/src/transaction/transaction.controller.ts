@@ -9,10 +9,6 @@ export class BurnTransactionDto {
 
   @IsNumber()
   @IsNotEmpty()
-  gemAmount: number;
-
-  @IsNumber()
-  @IsNotEmpty()
   galaAmount: number;
 
   @IsString()
@@ -27,15 +23,14 @@ export class TransactionController {
   @Post('burn')
   async burnTokens(@Body() body: BurnTransactionDto) {
     try {
-      const { signedTransaction, gemAmount, galaAmount, walletAddress } = body;
+      const { signedTransaction, galaAmount, walletAddress } = body;
 
-      if (gemAmount <= 0 || galaAmount <= 0) {
-        throw new HttpException('Amounts must be positive', HttpStatus.BAD_REQUEST);
+      if (galaAmount <= 0) {
+        throw new HttpException('Amount must be positive', HttpStatus.BAD_REQUEST);
       }
 
       const result = await this.transactionService.processBurnTransaction(
         signedTransaction,
-        gemAmount,
         galaAmount,
         walletAddress
       );

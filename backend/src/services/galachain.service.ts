@@ -277,11 +277,28 @@ export class GalaChainService {
    * Dry Run - Estimate transaction fees
    */
   async dryRun(method: string, dto: any): Promise<any> {
-    const dryRunDto = {
+    // Extract owner/signerAddress from the DTO for DryRun
+    let signerAddress: string | undefined;
+    const dtoObj = typeof dto === 'string' ? JSON.parse(dto) : dto;
+    
+    // Try to find owner or authorizedUser in the DTO
+    if (dtoObj.owner) {
+      signerAddress = dtoObj.owner;
+    } else if (dtoObj.authorizedUser) {
+      signerAddress = dtoObj.authorizedUser;
+    } else if (dtoObj.authorities && dtoObj.authorities.length > 0) {
+      signerAddress = dtoObj.authorities[0];
+    }
+    
+    const dryRunDto: any = {
       dto: typeof dto === 'string' ? dto : JSON.stringify(dto),
-      dtoExpiresAt: this.getExpirationTimestamp(),
       method,
     };
+    
+    // Add signerAddress if we found it
+    if (signerAddress) {
+      dryRunDto.signerAddress = signerAddress;
+    }
 
     try {
       const response = await fetch(`${this.baseUrl}/DryRun`, {
@@ -305,6 +322,47 @@ export class GalaChainService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * Extract fee estimate from DryRun response
+   * Looks for cumulativeFeeQuantity in the writes collection
+   */
+  extractFeeFromDryRunResponse(dryRunResponse: any, method: string, userAddress: string): string {
+    try {
+      if (!dryRunResponse?.Data?.writes) {
+        return '0';
+      }
+
+      const writes = dryRunResponse.Data.writes;
+      // Fee key pattern: \u0000GCFTU\u0000{method}\u0000{userAddress}\u0000
+      const feeKey = `\u0000GCFTU\u0000${method}\u0000${userAddress}\u0000`;
+      
+      // Try exact match first
+      if (writes[feeKey]) {
+        const feeData = typeof writes[feeKey] === 'string' 
+          ? JSON.parse(writes[feeKey]) 
+          : writes[feeKey];
+        return feeData.cumulativeFeeQuantity || '0';
+      }
+      
+      // If exact match fails, try to find any key that starts with GCFTU and the method
+      const feeKeyPrefix = `\u0000GCFTU\u0000${method}\u0000`;
+      for (const key in writes) {
+        if (key.startsWith(feeKeyPrefix)) {
+          const feeData = typeof writes[key] === 'string' 
+            ? JSON.parse(writes[key]) 
+            : writes[key];
+          if (feeData.cumulativeFeeQuantity) {
+            return feeData.cumulativeFeeQuantity;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting fee from DryRun response:', error);
+    }
+    
+    return '0';
   }
 }
 

@@ -225,7 +225,19 @@ const estimateFees = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to estimate fees')
+      let errorMessage = `Failed to estimate fees (${response.status})`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.message || errorData.error || errorMessage
+        console.error('Estimate fee error details:', errorData)
+      } catch (e) {
+        const text = await response.text().catch(() => '')
+        if (text) {
+          errorMessage = text
+          console.error('Estimate fee error text:', text)
+        }
+      }
+      throw new Error(errorMessage)
     }
 
     const result = await response.json()

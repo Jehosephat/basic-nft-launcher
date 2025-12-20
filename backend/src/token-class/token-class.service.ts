@@ -320,13 +320,20 @@ export class TokenClassService {
         uniqueKey: this.galaChainService.generateUniqueKey('create'),
       };
 
-      const fee = await this.galaChainService.dryRun(
+      const feeResponse = await this.galaChainService.dryRun(
         'CreateNftCollection',
         createDto,
       );
 
+      // Extract fee from DryRun response
+      const estimatedFee = this.galaChainService.extractFeeFromDryRunResponse(
+        feeResponse,
+        'CreateNftCollection',
+        walletAddress,
+      );
+
       return {
-        estimatedFee: fee,
+        estimatedFee,
       };
     } catch (error) {
       throw new HttpException(

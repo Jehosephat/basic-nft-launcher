@@ -214,13 +214,20 @@ export class CollectionService {
       };
 
       // Estimate fee for authorization
-      const authFee = await this.galaChainService.dryRun(
+      const feeResponse = await this.galaChainService.dryRun(
         'GrantNftCollectionAuthorization',
         authDto,
       );
 
+      // Extract fee from DryRun response
+      const estimatedFee = this.galaChainService.extractFeeFromDryRunResponse(
+        feeResponse,
+        'GrantNftCollectionAuthorization',
+        walletAddress,
+      );
+
       return {
-        estimatedFee: authFee,
+        estimatedFee,
       };
     } catch (error) {
       throw new HttpException(

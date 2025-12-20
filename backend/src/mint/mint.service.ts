@@ -180,7 +180,7 @@ export class MintService {
           collection: mintData.collection,
           type: mintData.type,
           category: mintData.category,
-          additionalKey: mintData.additionalKey,
+          additionalKey: mintData.additionalKey || '',
           dtoExpiresAt: dtoExpiresAt,
         },
         tokenInstance: '0',
@@ -188,18 +188,26 @@ export class MintService {
         uniqueKey: this.galaChainService.generateUniqueKey('mint'),
       };
 
-      const fee = await this.galaChainService.dryRun(
+      const feeResponse = await this.galaChainService.dryRun(
         'MintTokenWithAllowance',
         mintDto,
       );
 
+      // Extract fee from DryRun response
+      const estimatedFee = this.galaChainService.extractFeeFromDryRunResponse(
+        feeResponse,
+        'MintTokenWithAllowance',
+        mintData.owner,
+      );
+
       return {
-        estimatedFee: fee,
+        estimatedFee,
       };
     } catch (error) {
+      console.error('Error estimating mint fee:', error);
       throw new HttpException(
-        'Failed to estimate minting fee',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message || 'Failed to estimate minting fee',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

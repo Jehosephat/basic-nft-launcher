@@ -17,7 +17,6 @@ export class TransactionService {
 
   async processBurnTransaction(
     signedTransaction: any,
-    gemAmount: number,
     galaAmount: number,
     walletAddress: string
   ): Promise<{ transactionId: string }> {
@@ -39,15 +38,11 @@ export class TransactionService {
       const transaction = this.transactionRepository.create({
         userWalletAddress: walletAddress,
         galaAmount,
-        gemAmount,
         transactionId: galaChainResponse.transactionId,
         status: 'completed'
       });
 
       await this.transactionRepository.save(transaction);
-
-      // Add gems to user's balance
-      await this.walletService.addGems(walletAddress, gemAmount);
 
       return { transactionId: galaChainResponse.transactionId };
 
@@ -56,7 +51,6 @@ export class TransactionService {
       const transaction = this.transactionRepository.create({
         userWalletAddress: walletAddress,
         galaAmount,
-        gemAmount,
         transactionId: `failed-${Date.now()}`,
         status: 'failed'
       });
@@ -72,7 +66,6 @@ export class TransactionService {
 
   async getTransactionHistory(walletAddress: string): Promise<{
     transactions: Transaction[];
-    totalGems: number;
   }> {
     try {
       const isValid = await this.walletService.validateWalletAddress(walletAddress);
@@ -85,11 +78,8 @@ export class TransactionService {
         order: { createdAt: 'DESC' }
       });
 
-      const user = await this.walletService.findOrCreateUser(walletAddress);
-
       return {
-        transactions,
-        totalGems: user.gemBalance
+        transactions
       };
 
     } catch (error) {
