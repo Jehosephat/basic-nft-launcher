@@ -121,5 +121,30 @@ export class MintController {
       );
     }
   }
+
+  @Get('estimate-fee/:address')
+  async estimateFeeWithDummy(@Param('address') address: string) {
+    try {
+      // Use dummy values since fee doesn't depend on them
+      const estimate = await this.mintService.estimateMintFee({
+        collection: 'DUMMY',
+        type: 'DUMMY',
+        category: 'DUMMY',
+        additionalKey: 'none',
+        owner: address,
+        quantity: '1',
+      });
+
+      return {
+        success: true,
+        ...estimate,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to estimate fee',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
 

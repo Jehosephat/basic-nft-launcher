@@ -197,5 +197,39 @@ export class TokenClassController {
       );
     }
   }
+
+  @Get('estimate-fee/:address')
+  async estimateFeeWithDummy(@Param('address') address: string) {
+    try {
+      // Use dummy values since fee doesn't depend on them
+      const estimate = await this.tokenClassService.estimateCreateFee(
+        address,
+        {
+          collection: 'DUMMY',
+          type: 'DUMMY',
+          category: 'DUMMY',
+          additionalKey: 'none',
+          name: 'DUMMY',
+          description: 'DUMMY',
+          image: 'https://example.com/dummy.jpg',
+          symbol: 'DUM',
+          rarity: 'Common',
+          maxSupply: '1000',
+          maxCapacity: '1000',
+          metadataAddress: '',
+        },
+      );
+
+      return {
+        success: true,
+        ...estimate,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to estimate fee',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
 

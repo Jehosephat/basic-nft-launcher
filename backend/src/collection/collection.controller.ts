@@ -120,5 +120,26 @@ export class CollectionController {
       );
     }
   }
+
+  @Get('estimate-fee/:address')
+  async estimateFeeWithDummy(@Param('address') address: string) {
+    try {
+      // Use dummy collection name since fee doesn't depend on it
+      const estimate = await this.collectionService.estimateClaimFee(
+        address,
+        'DUMMY',
+      );
+
+      return {
+        success: true,
+        ...estimate,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to estimate fee',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
 

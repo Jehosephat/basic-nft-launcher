@@ -81,20 +81,7 @@
           />
         </div>
         
-        <div v-if="estimatedFee" class="status info">
-          <strong>Estimated Fee:</strong> {{ estimatedFee }}
-        </div>
-        
         <div class="form-actions">
-          <button
-            type="button"
-            @click="estimateFees"
-            :disabled="isProcessing || !canMint"
-            class="btn"
-          >
-            Estimate Fee
-          </button>
-          
           <button
             type="submit"
             :disabled="isProcessing || !canMint"
@@ -103,6 +90,10 @@
             <span v-if="isProcessing" class="loading"></span>
             {{ isProcessing ? 'Processing...' : 'Mint NFTs' }}
           </button>
+        </div>
+        
+        <div v-if="estimatedFee" class="fee-text">
+          Estimated Fee: {{ estimatedFee }}
         </div>
         
         <div v-if="status" class="status mt-3" :class="statusType">
@@ -114,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted } from 'vue'
+import { ref, computed, inject, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { walletService } from '../services/walletService'
 
@@ -199,57 +190,32 @@ const onTokenClassChange = () => {
   formData.value.quantity = ''
 }
 
-const estimateFees = async () => {
-  if (!canMint.value || !selectedTokenClass.value) {
-    status.value = 'Please fill in all required fields'
-    statusType.value = 'error'
-    return
-  }
+const loadFeeEstimate = async () => {
+  if (!props.walletAddress) return
 
   try {
-    status.value = 'Estimating fees...'
-    statusType.value = 'info'
-
-    const response = await fetch('/api/mint/estimate-fee', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        walletAddress: props.walletAddress,
-        collection: selectedTokenClass.value.collection,
-        type: selectedTokenClass.value.type,
-        category: selectedTokenClass.value.category,
-        additionalKey: selectedTokenClass.value.additionalKey,
-        owner: formData.value.owner,
-        quantity: formData.value.quantity,
-      }),
-    })
+    const response = await fetch(`/api/mint/estimate-fee/${props.walletAddress}`)
 
     if (!response.ok) {
-      let errorMessage = `Failed to estimate fees (${response.status})`
-      try {
-        const errorData = await response.json()
-        errorMessage = errorData.message || errorData.error || errorMessage
-        console.error('Estimate fee error details:', errorData)
-      } catch (e) {
-        const text = await response.text().catch(() => '')
-        if (text) {
-          errorMessage = text
-          console.error('Estimate fee error text:', text)
-        }
-      }
-      throw new Error(errorMessage)
+      throw new Error('Failed to estimate fees')
     }
 
     const result = await response.json()
-    estimatedFee.value = JSON.stringify(result.estimatedFee || result)
-    status.value = 'Fee estimated successfully'
-    statusType.value = 'success'
+    estimatedFee.value = result.estimatedFee || '0'
   } catch (error) {
     console.error('Error estimating fees:', error)
-    status.value = `Error: ${error instanceof Error ? error.message : 'Failed to estimate fees'}`
-    statusType.value = 'error'
+    // Don't show error to user, just fail silently
   }
 }
+
+// Load fee estimate when component mounts or wallet address changes
+onMounted(() => {
+  loadFeeEstimate()
+})
+
+watch(() => props.walletAddress, () => {
+  loadFeeEstimate()
+})
 
 const mintTokens = async () => {
   if (!canMint.value || !selectedTokenClass.value || !walletService.client) {
@@ -326,7 +292,7 @@ const mintTokens = async () => {
 
     const submitResult = await submitResponse.json()
 
-    status.value = `Successfully minted ${formData.value.quantity} NFT(s)! Transaction: ${submitResult.transactionId}`
+    status.value = `Successfully minted ${formData.value.quantity} NFT(s)!`
     statusType.value = 'success'
 
     // Reset form
@@ -423,6 +389,13 @@ onMounted(() => {
 
 select.form-control {
   cursor: pointer;
+}
+
+.fee-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
 }
 </style>
 

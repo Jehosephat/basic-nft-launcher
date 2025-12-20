@@ -188,20 +188,7 @@
           />
         </div>
         
-        <div v-if="estimatedFee" class="status info">
-          <strong>Estimated Fee:</strong> {{ estimatedFee }}
-        </div>
-        
         <div class="form-actions">
-          <button
-            type="button"
-            @click="estimateFees"
-            :disabled="isProcessing || !canCreate"
-            class="btn"
-          >
-            Estimate Fee
-          </button>
-          
           <button
             type="submit"
             :disabled="isProcessing || !canCreate"
@@ -210,6 +197,10 @@
             <span v-if="isProcessing" class="loading"></span>
             {{ isProcessing ? 'Processing...' : 'Create Token Class' }}
           </button>
+        </div>
+        
+        <div v-if="estimatedFee" class="fee-text">
+          Estimated Fee: {{ estimatedFee }}
         </div>
         
         <div v-if="status" class="status mt-3" :class="statusType">
@@ -221,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted } from 'vue'
+import { ref, computed, inject, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { walletService } from '../services/walletService'
 
@@ -344,47 +335,32 @@ const onCollectionChange = () => {
   rarityError.value = ''
 }
 
-const estimateFees = async () => {
-  if (!validateSymbol() || !validateRarity()) {
-    status.value = 'Please fix validation errors'
-    statusType.value = 'error'
-    return
-  }
-  
-  if (!canCreate.value) {
-    status.value = 'Please fill in all required fields'
-    statusType.value = 'error'
-    return
-  }
+const loadFeeEstimate = async () => {
+  if (!props.walletAddress) return
 
   try {
-    status.value = 'Estimating fees...'
-    statusType.value = 'info'
-
-    const response = await fetch('/api/token-classes/estimate-fee', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        walletAddress: props.walletAddress,
-        ...formData.value,
-        additionalKey: formData.value.additionalKey || 'none',
-      }),
-    })
+    const response = await fetch(`/api/token-classes/estimate-fee/${props.walletAddress}`)
 
     if (!response.ok) {
       throw new Error('Failed to estimate fees')
     }
 
     const result = await response.json()
-    estimatedFee.value = JSON.stringify(result.estimatedFee || result)
-    status.value = 'Fee estimated successfully'
-    statusType.value = 'success'
+    estimatedFee.value = result.estimatedFee || '0'
   } catch (error) {
     console.error('Error estimating fees:', error)
-    status.value = `Error: ${error instanceof Error ? error.message : 'Failed to estimate fees'}`
-    statusType.value = 'error'
+    // Don't show error to user, just fail silently
   }
 }
+
+// Load fee estimate when component mounts or wallet address changes
+onMounted(() => {
+  loadFeeEstimate()
+})
+
+watch(() => props.walletAddress, () => {
+  loadFeeEstimate()
+})
 
 const createTokenClass = async () => {
   if (!validateSymbol() || !validateRarity()) {
@@ -466,7 +442,7 @@ const createTokenClass = async () => {
 
     const submitResult = await submitResponse.json()
 
-    status.value = `Successfully created token class! Transaction: ${submitResult.transactionId}`
+    status.value = `Successfully created token class!`
     statusType.value = 'success'
 
     // Reset form (keep collection selected)
@@ -532,6 +508,13 @@ onMounted(() => {
 
 select.form-control {
   cursor: pointer;
+}
+
+.fee-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
 }
 </style>
 

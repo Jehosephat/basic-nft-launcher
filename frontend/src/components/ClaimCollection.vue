@@ -27,20 +27,7 @@
           </small>
         </div>
         
-        <div v-if="estimatedFee" class="status info">
-          <strong>Estimated Fee:</strong> {{ estimatedFee }}
-        </div>
-        
         <div class="form-actions">
-          <button
-            type="button"
-            @click="estimateFees"
-            :disabled="isProcessing || !formData.collection"
-            class="btn"
-          >
-            Estimate Fee
-          </button>
-          
           <button
             type="submit"
             :disabled="isProcessing || !formData.collection"
@@ -49,6 +36,10 @@
             <span v-if="isProcessing" class="loading"></span>
             {{ isProcessing ? 'Processing...' : 'Claim Collection' }}
           </button>
+        </div>
+        
+        <div v-if="estimatedFee" class="fee-text">
+          Estimated Fee: {{ estimatedFee }}
         </div>
         
         <div v-if="status" class="status mt-3" :class="statusType">
@@ -60,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted, watch } from 'vue'
 import { walletService } from '../services/walletService'
 import { galachainService } from '../services/galachainService'
 
@@ -77,40 +68,32 @@ const status = ref('')
 const statusType = ref('')
 const estimatedFee = ref('')
 
-const estimateFees = async () => {
-  if (!formData.value.collection) {
-    status.value = 'Please enter a collection name first'
-    statusType.value = 'error'
-    return
-  }
+const loadFeeEstimate = async () => {
+  if (!props.walletAddress) return
 
   try {
-    status.value = 'Estimating fees...'
-    statusType.value = 'info'
-
-    const response = await fetch('/api/collections/estimate-fee', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        walletAddress: props.walletAddress,
-        collection: formData.value.collection,
-      }),
-    })
+    const response = await fetch(`/api/collections/estimate-fee/${props.walletAddress}`)
 
     if (!response.ok) {
       throw new Error('Failed to estimate fees')
     }
 
     const result = await response.json()
-    estimatedFee.value = JSON.stringify(result.estimatedFee || result)
-    status.value = 'Fee estimated successfully'
-    statusType.value = 'success'
+    estimatedFee.value = result.estimatedFee || '0'
   } catch (error) {
     console.error('Error estimating fees:', error)
-    status.value = `Error: ${error instanceof Error ? error.message : 'Failed to estimate fees'}`
-    statusType.value = 'error'
+    // Don't show error to user, just fail silently
   }
 }
+
+// Load fee estimate when component mounts or wallet address changes
+onMounted(() => {
+  loadFeeEstimate()
+})
+
+watch(() => props.walletAddress, () => {
+  loadFeeEstimate()
+})
 
 const claimCollection = async () => {
   if (!formData.value.collection || !walletService.client) {
@@ -186,7 +169,7 @@ const claimCollection = async () => {
 
     const submitResult = await submitResponse.json()
 
-    status.value = `Successfully claimed collection "${formData.value.collection}"! Transaction: ${submitResult.transactionId}`
+    status.value = `Successfully claimed collection "${formData.value.collection}"!`
     statusType.value = 'success'
 
     // Reset form
@@ -226,6 +209,13 @@ const claimCollection = async () => {
 textarea.form-control {
   resize: vertical;
   min-height: 80px;
+}
+
+.fee-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
 }
 </style>
 
