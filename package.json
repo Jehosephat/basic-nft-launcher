@@ -1,7 +1,7 @@
 {
-  "name": "gem-store",
+  "name": "basic-nft-launcher",
   "version": "1.0.0",
-  "description": "A minimal gem store application demonstrating GalaChain wallet integration",
+  "description": "NFT Collection Management Application for GalaChain",
   "private": true,
   "workspaces": [
     "frontend",

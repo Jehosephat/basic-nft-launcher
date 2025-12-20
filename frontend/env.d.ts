@@ -6,7 +6,6 @@ interface ImportMetaEnv {
   readonly VITE_GALASWAP_API: string
   readonly VITE_PROJECT_ID: string
   readonly VITE_PROJECT_API: string
-  readonly VITE_GEM_EXCHANGE_RATE?: string
 }
 
 interface ImportMeta {

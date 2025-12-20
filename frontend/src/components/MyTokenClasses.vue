@@ -45,12 +45,6 @@
               <p v-if="tokenClass.currentSupply">
                 <strong>Current Supply:</strong> {{ tokenClass.currentSupply }}
               </p>
-              <p class="token-class-date">
-                <strong>Created:</strong> {{ formatDate(tokenClass.createdAt) }}
-              </p>
-              <p class="transaction-id">
-                <strong>Transaction ID:</strong> {{ tokenClass.transactionId }}
-              </p>
             </div>
             
             <div class="token-class-image" v-if="tokenClass.image">
@@ -114,12 +108,6 @@ const refreshTokenClasses = () => {
   fetchTokenClasses()
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleString()
-}
-
-
 onMounted(() => {
   if (props.walletAddress) {
     fetchTokenClasses()
@@ -152,27 +140,19 @@ onMounted(() => {
 .token-class-content {
   display: flex;
   gap: 1.5rem;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .token-class-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .token-class-details p {
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   font-size: 0.9rem;
-}
-
-.token-class-date {
-  color: #666;
-}
-
-.transaction-id {
-  font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
-  color: #666;
-  word-break: break-all;
 }
 
 .token-class-image {
@@ -194,8 +174,8 @@ onMounted(() => {
 }
 
 .token-class-actions {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
   border-top: 1px solid #e1e5e9;
 }
 

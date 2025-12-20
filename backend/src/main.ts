@@ -23,7 +23,7 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port);
   
-  console.log(`🚀 Gem Store Backend running on http://localhost:${port}`);
+  console.log(`🚀 NFT Collection Launcher Backend running on http://localhost:${port}`);
   console.log(`📊 API Documentation: http://localhost:${port}/api`);
 }
 

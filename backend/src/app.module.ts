@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
-import { GemModule } from './gem/gem.module';
 import { CollectionModule } from './collection/collection.module';
 import { TokenClassModule } from './token-class/token-class.module';
 import { MintModule } from './mint/mint.module';
@@ -23,7 +22,6 @@ import { MintTransaction } from './entities/mint-transaction.entity';
     }),
     WalletModule,
     TransactionModule,
-    GemModule,
     CollectionModule,
     TokenClassModule,
     MintModule,

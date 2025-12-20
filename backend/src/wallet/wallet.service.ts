@@ -17,24 +17,12 @@ export class WalletService {
 
     if (!user) {
       user = this.userRepository.create({
-        walletAddress,
-        gemBalance: 0
+        walletAddress
       });
       await this.userRepository.save(user);
     }
 
     return user;
-  }
-
-  async getUserBalance(walletAddress: string): Promise<{ gemBalance: number }> {
-    const user = await this.findOrCreateUser(walletAddress);
-    return { gemBalance: user.gemBalance };
-  }
-
-  async addGems(walletAddress: string, gemAmount: number): Promise<void> {
-    const user = await this.findOrCreateUser(walletAddress);
-    user.gemBalance += gemAmount;
-    await this.userRepository.save(user);
   }
 
   async validateWalletAddress(walletAddress: string): Promise<boolean> {

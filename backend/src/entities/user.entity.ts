@@ -9,9 +9,6 @@ export class User {
   @Column({ unique: true })
   walletAddress: string;
 
-  @Column({ default: 0 })
-  gemBalance: number;
-
   @CreateDateColumn()
   createdAt: Date;
 

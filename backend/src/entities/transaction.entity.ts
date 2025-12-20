@@ -14,9 +14,6 @@ export class Transaction {
   @Column('decimal', { precision: 10, scale: 6 })
   galaAmount: number;
 
-  @Column('int')
-  gemAmount: number;
-
   @Column()
   transactionId: string;
 
