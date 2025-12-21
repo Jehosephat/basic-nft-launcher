@@ -1,15 +1,14 @@
-# 💎 Gem Store - GalaChain Integration Example
+# 🎨 NFT Collection Manager - GalaChain Integration Example
 
-A minimal gem store application that demonstrates how to connect to GalaChain using MetaMask and execute transactions through wallet signing. This example focuses on teaching developers and AI systems the core patterns for GalaChain integration.
+A full-stack NFT collection management application that demonstrates how to connect to GalaChain using MetaMask and manage NFT collections, token classes, and minting operations.
 
-## 🎯 Learning Objectives
+## 🎯 Features
 
-- Connect MetaMask wallet to GalaChain
-- Check user registration status
-- Auto-register new users
-- Sign and submit burn transactions
-- Handle transaction states and errors
-- Display user balance and transaction history
+- **Claim NFT Collections**: Grant authorization for collection names
+- **Create Token Classes**: Define NFT token classes with metadata
+- **Mint NFTs**: Mint tokens from your created classes
+- **View Collections & Classes**: Browse your claimed collections and created token classes
+- **Transaction History**: Track all minting operations
 
 ## 🏗️ Architecture
 
@@ -17,6 +16,7 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
 - **Backend**: NestJS + TypeScript
 - **Database**: SQLite (for simplicity)
 - **Wallet**: MetaMask + @gala-chain/connect
+- **Blockchain**: GalaChain Testnet
 
 ## 🚀 Quick Start
 
@@ -24,7 +24,7 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
 
 - Node.js 18+ 
 - MetaMask browser extension
-- GALA tokens in your MetaMask wallet
+- GALA tokens in your MetaMask wallet (for transaction fees)
 
 ### Installation
 
@@ -32,8 +32,6 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
    
    **Option A: Use the install script (recommended)**
    ```bash
-   cd gem-store
-   
    # On Windows
    install.bat
    
@@ -44,7 +42,6 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
    
    **Option B: Manual installation**
    ```bash
-   cd gem-store
    npm install
    cd frontend && npm install && cd ..
    cd backend && npm install && cd ..
@@ -55,7 +52,7 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
    # Copy the example environment file
    cp frontend/env.example frontend/.env
    
-   # The default values should work for mainnet
+   # The default values should work for testnet
    # No editing required unless you want to customize
    ```
 
@@ -65,26 +62,33 @@ A minimal gem store application that demonstrates how to connect to GalaChain us
    ```
 
    This will start:
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:5173
    - Backend: http://localhost:4000
 
 ### Usage
 
 1. **Connect Wallet**: Click "Connect MetaMask" and approve the connection
-2. **Auto-Registration**: New users are automatically registered with GalaChain
-3. **Purchase Gems**: Select a gem package and burn GALA tokens to purchase gems
-4. **View History**: Check your transaction history and gem balance
+2. **Claim Collection**: Grant authorization for a collection name
+3. **Create Token Class**: Define an NFT token class for your collection
+4. **Mint NFTs**: Mint tokens from your created classes
+5. **View History**: Check your collections, classes, and mint transactions
 
 ## 📁 Project Structure
 
 ```
-gem-store/
+basic-nft-launcher/
 ├── frontend/                 # Vue.js frontend
 │   ├── src/
 │   │   ├── components/       # Vue components
 │   │   │   ├── WalletConnect.vue
-│   │   │   ├── GemStore.vue
-│   │   │   └── TransactionHistory.vue
+│   │   │   ├── ClaimCollection.vue
+│   │   │   ├── MyCollections.vue
+│   │   │   ├── CreateTokenClass.vue
+│   │   │   ├── MyTokenClasses.vue
+│   │   │   └── MintTokens.vue
+│   │   ├── services/         # Service modules
+│   │   │   ├── walletService.ts
+│   │   │   └── galachainService.ts
 │   │   ├── App.vue          # Main app component
 │   │   ├── main.ts          # App entry point
 │   │   └── style.css        # Global styles
@@ -93,10 +97,12 @@ gem-store/
 ├── backend/                  # NestJS backend
 │   ├── src/
 │   │   ├── entities/         # Database entities
-│   │   ├── wallet/           # Wallet module
-│   │   ├── transaction/      # Transaction module
-│   │   ├── gem/              # Gem module
-│   │   └── main.ts           # App entry point
+│   │   ├── collection/      # Collection module
+│   │   ├── token-class/     # Token class module
+│   │   ├── mint/            # Minting module
+│   │   ├── wallet/          # Wallet module
+│   │   ├── transaction/     # Transaction module
+│   │   └── main.ts          # App entry point
 │   └── package.json
 └── package.json              # Root package.json
 ```
@@ -108,24 +114,12 @@ gem-store/
 Create `frontend/.env` with:
 
 ```env
-# GalaChain API Endpoints
-VITE_TOKEN_GATEWAY_API=https://gateway-mainnet.galachain.com/api/asset/token-contract
-VITE_PUBLIC_KEY_GATEWAY_API=https://gateway-mainnet.galachain.com/api/asset/public-key-contract
-VITE_CONNECT_API=https://api-galaswap.gala.com/galachain
+# GalaChain Testnet API
+VITE_GALACHAIN_API=https://gateway-testnet.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-GalaChainToken
 
 # Project Configuration
-VITE_PROJECT_ID=gem-store
 VITE_PROJECT_API=http://localhost:4000
-VITE_GEM_EXCHANGE_RATE=10
 ```
-
-### Gem Packages
-
-The default gem packages are:
-- 10 gems for 1 GALA
-- 50 gems for 5 GALA  
-- 100 gems for 10 GALA
-- 500 gems for 50 GALA
 
 ## 🔄 GalaChain Integration Flow
 
@@ -134,76 +128,89 @@ The default gem packages are:
 // Connect to MetaMask
 await metamaskClient.connect()
 const address = metamaskClient.galaChainAddress
-
-// Check registration
-await checkRegistration(address)
-// Auto-register if needed
-await registerUser(metamaskClient)
 ```
 
-### 2. Transaction Signing
+### 2. Claim Collection
 ```typescript
-// Create burn transaction
-const burnTokensDto = {
-  owner: walletAddress,
-  tokenInstances: [{
-    quantity: galaAmount.toString(),
-    tokenInstanceKey: {
-      collection: "GALA",
-      category: "Unit", 
-      type: "none",
-      additionalKey: "none",
-      instance: "0"
-    }
-  }],
-  uniqueKey: `gem-purchase-${Date.now()}`
+// Grant collection authorization
+const authDto = {
+  authorizedUser: walletAddress,
+  collection: collectionName,
+  dtoExpiresAt: Date.now() + 60000,
+  uniqueKey: generateUniqueKey()
 }
 
 // Sign with MetaMask
-const signedTransaction = await metamaskClient.sign("BurnTokens", burnTokensDto)
+const signedAuth = await metamaskClient.sign("GrantNftCollectionAuthorization", authDto)
 ```
 
-### 3. Transaction Submission
+### 3. Create Token Class
 ```typescript
-// Submit to GalaChain
-const response = await fetch(`${TOKEN_GATEWAY_API}/BurnTokens`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(signedTransaction)
-})
+// Create NFT collection (token class)
+const createDto = {
+  collection: collectionName,
+  category: category,
+  type: type,
+  name: name,
+  description: description,
+  image: imageUrl,
+  symbol: symbol,
+  rarity: rarity,
+  maxSupply: maxSupply,
+  maxCapacity: maxCapacity,
+  // ... other fields
+}
+
+// Sign with MetaMask
+const signedCreate = await metamaskClient.sign("CreateNftCollection", createDto)
+```
+
+### 4. Mint Tokens
+```typescript
+// Mint NFTs
+const mintDto = {
+  owner: walletAddress,
+  quantity: quantity,
+  tokenClass: {
+    collection: collection,
+    category: category,
+    type: type,
+    additionalKey: additionalKey || 'none'
+  }
+}
+
+// Sign with MetaMask
+const signedMint = await metamaskClient.sign("MintTokenWithAllowance", mintDto)
 ```
 
 ## 🛠️ API Endpoints
 
-### Wallet Management
-- `GET /api/wallet/balance/:address` - Get user's gem balance
-- `POST /api/wallet/connect` - Validate wallet connection
+### Collections
+- `POST /api/collections/claim` - Claim a collection name
+- `GET /api/collections/:address` - Get user's collections
+- `GET /api/collections/single/:collectionName` - Get single collection
+- `POST /api/collections/estimate-fee` - Estimate claim fee
 
-### Transactions  
-- `POST /api/transactions/burn` - Process GALA burn for gems
-- `GET /api/transactions/history/:address` - Get user transaction history
+### Token Classes
+- `POST /api/token-classes/create` - Create a token class
+- `GET /api/token-classes/user/:address` - Get user's token classes
+- `GET /api/token-classes/collection/:collection` - Get collection's token classes
+- `POST /api/token-classes/estimate-fee` - Estimate creation fee
 
-### Gems
-- `GET /api/gems/packages` - Get available gem packages
-- `GET /api/gems/exchange-rate` - Get current exchange rate
+### Minting
+- `POST /api/mint/tokens` - Mint NFTs
+- `GET /api/mint/transactions/:address` - Get mint transactions
+- `POST /api/mint/estimate-fee` - Estimate minting fee
 
 ## 🧪 Testing
 
 ### Manual Testing
 
-1. **Wallet Connection**: Verify MetaMask connection and auto-registration
-2. **Transaction Flow**: Test gem purchases with different amounts
-3. **Error Handling**: Test with insufficient balance, network errors
-4. **History**: Verify transaction history displays correctly
-
-### Test Scenarios
-
-- ✅ Connect wallet successfully
-- ✅ Auto-register new users
-- ✅ Purchase gems with sufficient GALA
-- ✅ Handle insufficient balance
-- ✅ Display transaction history
-- ✅ Handle network errors gracefully
+1. **Wallet Connection**: Verify MetaMask connection
+2. **Collection Claiming**: Test claiming a collection name
+3. **Token Class Creation**: Test creating token classes with various metadata
+4. **Minting**: Test minting NFTs from created classes
+5. **Error Handling**: Test with invalid data, network errors
 
 ## 🚨 Error Handling
 
@@ -211,17 +218,17 @@ The application handles common error scenarios:
 
 - **MetaMask not installed**: Clear error message with installation link
 - **User rejects connection**: Graceful handling with retry option
-- **Insufficient balance**: Validation before transaction submission
-- **Network errors**: Retry mechanisms and user feedback
 - **Transaction failures**: Proper error logging and user notification
+- **Network errors**: Retry mechanisms and user feedback
+- **Validation errors**: Clear messages for invalid input
 
 ## 📚 Key Learning Points
 
 1. **Wallet Integration**: Complete MetaMask connection flow
-2. **User Registration**: Automatic GalaChain user registration
-3. **Transaction Signing**: MetaMask transaction signing patterns
-4. **Error Handling**: Comprehensive error handling strategies
-5. **State Management**: Wallet and transaction state management
+2. **NFT Collection Management**: Claiming and managing collections
+3. **Token Class Creation**: Creating NFT token classes with metadata
+4. **Transaction Signing**: MetaMask transaction signing patterns
+5. **Error Handling**: Comprehensive error handling strategies
 6. **API Design**: RESTful API design for blockchain integration
 
 ## 🔗 Related Resources
@@ -237,7 +244,7 @@ The application handles common error scenarios:
 - Uses SQLite for simplicity - use PostgreSQL/MySQL for production
 - No authentication beyond wallet connection
 - Minimal error handling for educational purposes
-- Exchange rates are hardcoded for simplicity
+- Targets GalaChain Testnet
 
 ## 🤝 Contributing
 

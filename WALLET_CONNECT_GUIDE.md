@@ -1,8 +1,8 @@
 # MetaMask to GalaChain Connection & Transaction Signing Guide
 
-**Based on the gem-store project implementation**
+**Based on the NFT Collection Manager project implementation**
 
-This guide provides a definitive, step-by-step walkthrough of how to connect MetaMask to GalaChain and use it to sign transactions, based on the working implementation in the gem-store project.
+This guide provides a definitive, step-by-step walkthrough of how to connect MetaMask to GalaChain and use it to sign transactions, based on the working implementation in the NFT Collection Manager project.
 
 ---
 
@@ -41,7 +41,7 @@ Before you begin, ensure you have:
 
 ### 1. Install Dependencies
 
-The gem-store project uses the following key dependencies:
+The NFT Collection Manager project uses the following key dependencies:
 
 ```json
 {
@@ -119,9 +119,7 @@ VITE_BURN_GATEWAY_PUBLIC_KEY_API=https://gateway-mainnet.galachain.com/api/asset
 VITE_GALASWAP_API=https://api-galaswap.gala.com/galachain
 
 # Project Configuration
-VITE_PROJECT_ID=gem-store
 VITE_PROJECT_API=http://localhost:4000
-VITE_GEM_EXCHANGE_RATE=10
 ```
 
 ### TypeScript Environment Types
@@ -137,7 +135,6 @@ interface ImportMetaEnv {
   readonly VITE_GALASWAP_API: string
   readonly VITE_PROJECT_ID: string
   readonly VITE_PROJECT_API: string
-  readonly VITE_GEM_EXCHANGE_RATE?: string
 }
 
 interface ImportMeta {
@@ -153,7 +150,7 @@ interface ImportMeta {
 
 ### Step-by-Step Process
 
-The wallet connection process follows these exact steps as implemented in gem-store:
+The wallet connection process follows these exact steps as implemented in the NFT Collection Manager:
 
 #### 1. Check MetaMask Availability
 
@@ -347,7 +344,7 @@ GalaChain transactions follow a specific structure:
 
 ### Example: BurnTokens Transaction
 
-The gem-store project uses `BurnTokens` as an example. Here's the complete flow:
+The NFT Collection Manager uses `GrantNftCollectionAuthorization`, `CreateNftCollection`, and `MintTokenWithAllowance` as examples. Here's the complete flow:
 
 #### 1. Create Transaction DTO
 
@@ -364,7 +361,7 @@ const burnTokensDto = {
       instance: "0"
     }
   }],
-  uniqueKey: `gem-purchase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  uniqueKey: `nft-operation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 ```
 
@@ -545,7 +542,7 @@ async function fetchGalaBalance(walletAddress: string): Promise<number> {
 
 ### Wallet Service (Complete Implementation)
 
-Based on gem-store's `walletService.ts`:
+Based on the NFT Collection Manager's `walletService.ts`:
 
 ```typescript
 import { BrowserConnectClient } from '@gala-chain/connect'
@@ -619,7 +616,7 @@ export const walletService = {
 
 ### Wallet Connect Component (Vue Example)
 
-Based on gem-store's `WalletConnect.vue`:
+Based on the NFT Collection Manager's `WalletConnect.vue`:
 
 ```vue
 <template>
@@ -743,7 +740,7 @@ const fetchBalance = async (address: string) => {
 
 ### Transaction Signing Component (Vue Example)
 
-Based on gem-store's `GemStore.vue`:
+Based on the NFT Collection Manager's `ClaimCollection.vue`:
 
 ```vue
 <template>
@@ -786,60 +783,48 @@ const canPurchase = computed(() => {
   return galaBalance.value >= 1
 })
 
-const purchaseGems = async () => {
+const claimCollection = async () => {
   if (!props.walletAddress) return
   
   try {
     isProcessing.value = true
     status.value = ''
     
-    // Step 1: Create burn transaction DTO
-    const burnTokensDto = {
-      owner: props.walletAddress,
-      tokenInstances: [{
-        quantity: "1", // Amount to burn
-        tokenInstanceKey: {
-          collection: "GALA",
-          category: "Unit",
-          type: "none",
-          additionalKey: "none",
-          instance: "0"
-        }
-      }],
-      uniqueKey: `gem-purchase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // Step 1: Create collection authorization DTO
+    const authDto = {
+      authorizedUser: props.walletAddress,
+      collection: collectionName.value,
+      dtoExpiresAt: Date.now() + 60000,
+      uniqueKey: `collection-claim-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     }
 
     // Step 2: Sign the transaction with MetaMask
-    const signedTransaction = await walletService.signTransaction("BurnTokens", burnTokensDto)
+    const signedTransaction = await walletService.signTransaction("GrantNftCollectionAuthorization", authDto)
     
-    // Step 3: Submit to backend (or directly to GalaChain)
-    const response = await fetch('/api/transactions/burn', {
+    // Step 3: Submit to backend
+    const response = await fetch(`${API_BASE_URL}/collections/claim`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        signedTransaction: signedTransaction,
-        gemAmount: 10,
-        galaAmount: 1,
-        walletAddress: props.walletAddress
+        signedAuthorization: signedTransaction,
+        walletAddress: props.walletAddress,
+        collection: collectionName.value
       })
     })
 
     if (!response.ok) {
-      throw new Error('Failed to process transaction')
+      throw new Error('Failed to claim collection')
     }
 
     const result = await response.json()
     
-    // Update balance
-    galaBalance.value -= 1
-    
     // Show success
-    status.value = `Successfully purchased 10 gems! Transaction: ${result.transactionId}`
+    status.value = `Successfully claimed collection "${collectionName.value}"!`
     statusType.value = 'success'
     
   } catch (error) {
-    console.error('Error purchasing gems:', error)
-    status.value = `Error: ${error instanceof Error ? error.message : 'Failed to purchase gems'}`
+    console.error('Error claiming collection:', error)
+    status.value = `Error: ${error instanceof Error ? error.message : 'Failed to claim collection'}`
     statusType.value = 'error'
   } finally {
     isProcessing.value = false
@@ -1173,7 +1158,7 @@ Before deploying, test:
 
 ## Conclusion
 
-This guide provides a complete, production-ready implementation pattern for connecting MetaMask to GalaChain and signing transactions, based on the working gem-store project. Follow these patterns exactly, and you'll have a robust wallet integration.
+This guide provides a complete, production-ready implementation pattern for connecting MetaMask to GalaChain and signing transactions, based on the working NFT Collection Manager project. Follow these patterns exactly, and you'll have a robust wallet integration.
 
 **Key Takeaways:**
 1. Always check MetaMask availability before connecting
@@ -1183,5 +1168,5 @@ This guide provides a complete, production-ready implementation pattern for conn
 5. Use unique keys for all transactions
 6. Provide clear, user-friendly error messages
 
-For questions or issues, refer to the gem-store project source code as the definitive reference implementation.
+For questions or issues, refer to the NFT Collection Manager project source code as the definitive reference implementation.
 

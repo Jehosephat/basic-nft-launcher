@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Installing Gem Store Dependencies..."
+echo "🚀 Installing NFT Collection Manager Dependencies..."
 
 # Install root dependencies
 echo "📦 Installing root dependencies..."
@@ -25,4 +25,4 @@ echo "1. Copy frontend/env.example to frontend/.env"
 echo "2. Run 'npm run dev' to start both servers"
 echo "3. Open http://localhost:3000 in your browser"
 echo ""
-echo "🔗 Make sure you have MetaMask installed and some GALA tokens!"
+echo "🔗 Make sure you have MetaMask installed and some GALA tokens for transaction fees!"
