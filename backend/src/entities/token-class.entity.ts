@@ -1,11 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index, Unique } from 'typeorm';
 
 @Entity('token_classes')
+@Unique(['collection', 'type', 'category', 'additionalKey'])
 export class TokenClass {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
+  @Index('idx_token_classes_collection')
   collection: string; // Collection name
 
   @Column()
@@ -14,28 +16,29 @@ export class TokenClass {
   @Column()
   category: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'additional_key', default: 'none' })
   additionalKey: string;
 
-  @Column()
+  @Column({ name: 'wallet_address' })
+  @Index('idx_token_classes_wallet_address')
   walletAddress: string; // User who created it
 
-  @Column()
+  @Column({ name: 'transaction_id' })
   transactionId: string;
 
   @Column({ default: 'pending' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'current_supply', default: '0' })
   currentSupply: string; // From FetchTokenClassesWithSupply
 
   @Column({ nullable: true })
   image: string; // Image URL for the token class
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
 

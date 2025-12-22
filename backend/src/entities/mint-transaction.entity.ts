@@ -1,14 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
 
 @Entity('mint_transactions')
 export class MintTransaction {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'wallet_address' })
+  @Index('idx_mint_transactions_wallet_address')
   walletAddress: string; // User who initiated the mint
 
   @Column()
+  @Index('idx_mint_transactions_collection')
   collection: string;
 
   @Column()
@@ -17,7 +19,7 @@ export class MintTransaction {
   @Column()
   category: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'additional_key', nullable: true })
   additionalKey: string;
 
   @Column()
@@ -26,16 +28,17 @@ export class MintTransaction {
   @Column()
   quantity: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'token_instance', default: '0' })
   tokenInstance: string;
 
-  @Column()
+  @Column({ name: 'transaction_id' })
   transactionId: string;
 
   @Column({ default: 'pending' })
   status: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
+  @Index('idx_mint_transactions_created_at')
   createdAt: Date;
 }
 
