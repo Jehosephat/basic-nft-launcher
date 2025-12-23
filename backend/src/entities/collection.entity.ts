@@ -1,14 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 @Entity('collections')
 export class Collection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ name: 'collection_name', unique: true })
   collectionName: string;
 
-  @Column()
+  @Column({ name: 'wallet_address' })
+  @Index('idx_collections_wallet_address')
   walletAddress: string; // User who claimed it
 
   @Column({ nullable: true })
@@ -23,7 +24,7 @@ export class Collection {
   @Column({ nullable: true })
   symbol: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'contract_address', nullable: true })
   contractAddress: string;
 
   @Column({ nullable: true })
@@ -35,25 +36,25 @@ export class Collection {
   @Column({ nullable: true })
   rarity: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'max_supply', nullable: true })
   maxSupply: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'max_capacity', nullable: true })
   maxCapacity: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'metadata_address', nullable: true })
   metadataAddress: string;
 
-  @Column()
+  @Column({ name: 'transaction_id' })
   transactionId: string; // From CreateNftCollection
 
   @Column({ default: 'pending' })
   status: string; // pending, completed, failed
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
 
