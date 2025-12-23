@@ -1,0 +1,21 @@
+# Railway Nixpacks configuration for seamless deployment
+# This file tells Railway exactly how to build and deploy
+# Railway detects backend/ as service root, so paths are relative to backend/
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x"]
+
+[phases.install]
+cmds = [
+  "npm install",
+  "cd ../frontend && npm install && cd ../backend"
+]
+
+[phases.build]
+cmds = [
+  "npm run build:all"
+]
+
+[start]
+cmd = "npm run start:prod"
+
