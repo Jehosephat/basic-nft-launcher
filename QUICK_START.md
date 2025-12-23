@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## 🚀 Railway Deployment (5 Minutes)
+## 🚀 Railway Deployment (2 Minutes - Zero Config!)
 
 ### Step 1: Push to GitHub
 ```bash
@@ -18,28 +18,22 @@ git push
 ### Step 3: Add PostgreSQL
 1. In Railway project, click "New"
 2. Select "Database" → "Add PostgreSQL"
+3. Railway automatically provides database variables
 
-### Step 4: Configure Backend Service
-1. Railway auto-detects backend
-2. Go to service → Settings → Variables
-3. Add these variables:
+### Step 4: Deploy
+**That's it!** Railway automatically:
+- ✅ Detects `backend/` as the service
+- ✅ Builds frontend and backend
+- ✅ Serves frontend from backend (unified service)
+- ✅ Sets up database connection
+- ✅ Configures CORS automatically
 
-```env
-NODE_ENV=production
-PORT=${{PORT}}
-DATABASE_HOST=${{Postgres.DATABASE_HOST}}
-DATABASE_PORT=${{Postgres.DATABASE_PORT}}
-DATABASE_USER=${{Postgres.DATABASE_USER}}
-DATABASE_PASSWORD=${{Postgres.DATABASE_PASSWORD}}
-DATABASE_NAME=${{Postgres.DATABASE_NAME}}
-DATABASE_SSL=true
-ALLOWED_ORIGINS=https://your-frontend-url.railway.app
-GALACHAIN_API=https://gateway-testnet.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-GalaChainToken
-SERVE_STATIC=false
-```
+### Step 5: Generate Domain (Optional)
+1. Go to Settings → Networking
+2. Click "Generate Domain"
+3. Your app is live!
 
-### Step 5: Deploy
-Railway automatically deploys! Check the "Deployments" tab.
+**No environment variables needed!** Everything works automatically.
 
 ## 🏠 Local Development
 

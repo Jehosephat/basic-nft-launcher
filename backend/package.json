@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "nest build",
+    "build:all": "npm run build:frontend && npm run build",
+    "build:frontend": "cd ../frontend && npm install && npm run build && cd ../backend",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",

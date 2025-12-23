@@ -10,8 +10,9 @@ async function bootstrap() {
   const config = getAppConfig();
   
   // Enable CORS for frontend
+  // If serving static files, CORS is less critical (same origin), but we allow it anyway
   app.enableCors({
-    origin: config.allowedOrigins,
+    origin: config.allowedOrigins.includes('*') ? true : config.allowedOrigins,
     credentials: true,
   });
   
@@ -31,14 +32,51 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   
   // Serve static files if configured (for unified deployment)
+  // In production, this is enabled by default
   if (config.serveStatic) {
     const path = require('path');
     const express = require('express');
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-    // Catch all handler for SPA routing
-    app.get('*', (req: any, res: any) => {
-      res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-    });
+    const fs = require('fs');
+    
+    // Try multiple possible paths for frontend dist (Railway build locations)
+    const possiblePaths = [
+      path.join(__dirname, '../frontend/dist'),      // Relative to dist/
+      path.join(__dirname, '../../frontend/dist'),   // Relative to dist/src/
+      path.join(process.cwd(), 'frontend/dist'),     // From project root
+      path.join(process.cwd(), '../frontend/dist'),  // From backend/ directory
+    ];
+    
+    let staticPathFound = false;
+    for (const staticPath of possiblePaths) {
+      try {
+        if (fs.existsSync(staticPath) && fs.existsSync(path.join(staticPath, 'index.html'))) {
+          const expressApp = app.getHttpAdapter().getInstance();
+          
+          // Serve static files (CSS, JS, images, etc.)
+          expressApp.use(express.static(staticPath, { index: false }));
+          
+          // Catch-all for SPA routing (must be after API routes)
+          expressApp.get('*', (req: any, res: any, next: any) => {
+            // Skip API routes and health check
+            if (req.path.startsWith('/api') || req.path === '/health') {
+              return next();
+            }
+            // Serve index.html for SPA routing
+            res.sendFile(path.join(staticPath, 'index.html'));
+          });
+          
+          console.log(`✅ Serving frontend from: ${staticPath}`);
+          staticPathFound = true;
+          break;
+        }
+      } catch (error) {
+        // Continue to next path
+      }
+    }
+    
+    if (!staticPathFound) {
+      console.warn('⚠️  SERVE_STATIC is enabled but frontend/dist not found. Frontend will not be served.');
+    }
   }
   
   await app.listen(config.port);
