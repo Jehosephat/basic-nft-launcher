@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Installing Gem Store Dependencies..."
+echo "🚀 Installing NFT Collection Manager Dependencies..."
 
 # Install root dependencies
 echo "📦 Installing root dependencies..."

@@ -199,7 +199,6 @@ npm run build
 
 The application uses **SQLite** databases stored in the `backend/` directory:
 - `nft-collection.db` - Main database for collections, token classes, and transactions
-- `gem-store.db` - Legacy database (if present)
 
 The database is automatically created on first run. No additional setup required.
 
