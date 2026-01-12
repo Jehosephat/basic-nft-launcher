@@ -231,7 +231,7 @@ export class CollectionService {
       };
     } catch (error) {
       throw new HttpException(
-        'Failed to estimate fees',
+        `Failed to estimate fees: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -1,6 +1,6 @@
 const GALACHAIN_API =
   import.meta.env.VITE_GALACHAIN_API ||
-  'https://gateway-testnet.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-GalaChainToken';
+  'https://gateway-mainnet.galachain.com/api/asset/token-contract';
 
 export interface GrantCollectionAuthorizationDto {
   authorizedUser: string;

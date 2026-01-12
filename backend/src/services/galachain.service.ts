@@ -7,7 +7,7 @@ export class GalaChainService {
   constructor() {
     this.baseUrl =
       process.env.GALACHAIN_API ||
-      'https://gateway-testnet.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-GalaChainToken';
+      'https://gateway-mainnet.galachain.com/api/asset/token-contract';
   }
 
   /**
@@ -350,6 +350,18 @@ export class GalaChainService {
       const feeKeyPrefix = `\u0000GCFTU\u0000${method}\u0000`;
       for (const key in writes) {
         if (key.startsWith(feeKeyPrefix)) {
+          const feeData = typeof writes[key] === 'string' 
+            ? JSON.parse(writes[key]) 
+            : writes[key];
+          if (feeData.cumulativeFeeQuantity) {
+            return feeData.cumulativeFeeQuantity;
+          }
+        }
+      }
+      
+      // Try to find any key containing GCFTU
+      for (const key in writes) {
+        if (key.includes('GCFTU')) {
           const feeData = typeof writes[key] === 'string' 
             ? JSON.parse(writes[key]) 
             : writes[key];
