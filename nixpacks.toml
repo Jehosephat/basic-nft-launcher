@@ -3,6 +3,8 @@
 
 [phases.setup]
 nixPkgs = ["nodejs_20"]
+# Set NODE_ENV to development during install to ensure devDependencies are installed
+env = { "NODE_ENV" = "development" }
 
 [phases.install]
 cmds = [
@@ -13,9 +15,12 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "npm run build",
-  "ls -la backend/dist || echo 'Backend dist not found'",
-  "test -f backend/dist/main.js || (echo 'ERROR: backend/dist/main.js not found' && exit 1)"
+  "echo 'Building frontend...' && npm run build:frontend",
+  "echo 'Building backend...' && npm run build:backend",
+  "echo 'Copying frontend...' && npm run copy:frontend",
+  "echo 'Verifying build...'",
+  "test -f backend/dist/main.js && echo '✓ backend/dist/main.js exists' || (echo '✗ ERROR: backend/dist/main.js not found!' && ls -la backend/dist/ && exit 1)",
+  "echo 'Build complete!'"
 ]
 
 [start]

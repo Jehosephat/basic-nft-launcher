@@ -1,0 +1,14 @@
+# Files to ignore during Railway deployment
+node_modules/
+.git/
+*.log
+.env.local
+.env.development
+.env.test
+*.db
+*.db-shm
+*.db-wal
+dist/
+frontend/dist/
+backend/frontend-dist/
+logs/
