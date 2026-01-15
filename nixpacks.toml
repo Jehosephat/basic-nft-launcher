@@ -13,8 +13,10 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "npm run build"
+  "npm run build",
+  "ls -la backend/dist || echo 'Backend dist not found'",
+  "test -f backend/dist/main.js || (echo 'ERROR: backend/dist/main.js not found' && exit 1)"
 ]
 
 [start]
-cmd = "npm run start:prod"
+cmd = "cd /app && npm run start:prod"

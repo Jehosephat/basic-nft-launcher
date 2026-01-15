@@ -12,6 +12,7 @@
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run start:dev",
     "build": "npm run build:frontend && npm run build:backend && npm run copy:frontend",
+    "build:check": "npm run build && test -f backend/dist/main.js && echo 'Build successful'",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
     "copy:frontend": "node scripts/copy-frontend.js",
