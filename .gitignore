@@ -84,6 +84,9 @@ frontend/dist/
 frontend/.vite/
 frontend/.output/
 
+# Production frontend build in backend
+backend/frontend-dist/
+
 # TypeScript
 *.tsbuildinfo
 *.d.ts.map

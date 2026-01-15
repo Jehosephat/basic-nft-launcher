@@ -15,10 +15,10 @@ import { MintTransaction } from './entities/mint-transaction.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'nft-collection.db',
+      database: process.env.DATABASE_PATH || (process.env.NODE_ENV === 'production' ? './data/nft-collection.db' : 'nft-collection.db'),
       entities: [User, Transaction, Collection, TokenClass, MintTransaction],
-      synchronize: true, // Only for development
-      logging: false,
+      synchronize: process.env.NODE_ENV !== 'production', // Disable in production for safety
+      logging: process.env.NODE_ENV === 'development',
     }),
     WalletModule,
     TransactionModule,
